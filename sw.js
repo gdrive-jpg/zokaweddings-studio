@@ -1,10 +1,10 @@
 const scope = self.registration.scope;
-const cachePrefix = `zokaweddings:${scope}`;
+const cachePrefix = `zokaweddings:${scope}:`;
 const cacheName = `${cachePrefix}v1`;
 const home = new URL('./', scope).href;
+const index = new URL('./index.html', scope).href;
 const resources = [
   './',
-  './index.html',
   './install.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -33,10 +33,10 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
   url.search = '';
-  if (request.mode === 'navigate' && [home, new URL('./index.html', scope).href].includes(url.href)) {
+  if (request.mode === 'navigate' && (url.href === home || url.href === index)) {
     event.respondWith(fetch(request).catch(async () => {
       const cache = await caches.open(cacheName);
-      return (await cache.match(url.href)) ?? Response.error();
+      return (await cache.match(home)) ?? Response.error();
     }));
   } else if (resources.includes(request.url)) {
     event.respondWith(caches.open(cacheName).then(async cache =>
